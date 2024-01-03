@@ -29,6 +29,7 @@ Includes & Plugins:
 #define MYSQL_PASSWORD "basicRoleplay"
 
 #define COLOR_WHITE		0xFFFFFF00
+#define COLOR_RED		0xFF000000
 
 #define DIALOG_UNUSED		0
 #define DIALOG_REGISTER		1
@@ -37,7 +38,10 @@ Includes & Plugins:
 enum PLAYER_DATA
 {
 	pSQLID,
-	pAdminLevel
+	pAdminLevel,
+	pMoney,
+	pLevel,
+	pRespect
 }
 
 // Global variables
@@ -45,7 +49,6 @@ new sqlConnection;
 
 // Player variables
 new bool:LoggedIn[MAX_PLAYERS], PlayerData[MAX_PLAYERS][PLAYER_DATA];
-
 
 main(){}
 
@@ -105,6 +108,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	return false;
 }
 
+// Server functions
 Server:DoesPlayerExist(playerid)
 {
 	new query[128];
@@ -169,13 +173,38 @@ Server:SQL_OnAccountLogin(playerid)
 		ShowLoginDialog(playerid, "Incorrect password.");
 	}
 	
+	SendClientMessage(playerid, COLOR_WHITE, "You have successfully logged into the server.");
+	
 	PlayerData[playerid][pSQLID] = cache_get_field_content_int(0, "id", sqlConnection);
+	LoadPlayerData(playerid);
+	
+	return true;
+}
+
+Server:LoadPlayerData(playerid)
+{
+	new query[128];
+	mysql_format(sqlConnection, query, sizeof(query), "SELECT * FROM players WHERE id = %i LIMIT 1", PlayerData[playerid][pSQLID]);
+	mysql_pquery(sqlConnection, query, "SQL_OnLoadAccount", "i");
+}
+
+Server:SQL_OnLoadAccount(playerid)
+{
 	PlayerData[playerid][pAdminLevel] = cache_get_field_content_int(0, "AdminLevel", sqlConnection);
+	PlayerData[playerid][pMoney] = cache_get_field_content_int(0, "Money", sqlConnection);
+	PlayerData[playerid][pLevel] = cache_get_field_content_int(0, "Level", sqlConnection);
+	PlayerData[playerid][pRespect] = cache_get_field_content_int(0, "Respect", sqlConnection);
+	
+	SetPlayerScore(playerid, PlayerData[playerid][pLevel]);
+	
+	ResetPlayerMoney(playerid);
+	GivePlayerMoney(playerid, PlayerData[playerid][pMoney]);
+	
 	
 	new string[128];
 	format(string, sizeof(string), "SQLID: %d | Admin: %d", PlayerData[playerid][pSQLID], PlayerData[playerid][pAdminLevel]);
 	SendClientMessage(playerid, COLOR_WHITE, string);
-	
+
 	return true;
 }
 
@@ -183,12 +212,45 @@ Server:DefaultPlayerValues(playerid)
 {
 	PlayerData[playerid][pSQLID] = 0;
 	PlayerData[playerid][pAdminLevel] = 0;
+	PlayerData[playerid][pMoney] = 0;
+	PlayerData[playerid][pLevel] = 1;
+	PlayerData[playerid][pRespect] = 0;
 	
 	return true;
 }
 
-// Stocks and other functions
+Server:SaveSQLInt(sqlid, table[], row[], value)
+{
+	new query[128];
+	mysql_format(sqlConnection, query, sizeof(query), "UPDATE %e SET %e = %i WHERE id = %i", table, row, value, sqlid);
+	mysql_pquery(sqlConnection, query);
+	
+	return true;
+}
 
+// Account commands
+CMD:buylevel(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	new neededRespect = PlayerData[playerid][pLevel] * 10;
+	
+	if(PlayerData[playerid][pRespect] < neededRespect) return SendClientMessage(playerid, COLOR_RED, "ERROR: You don't have enough respect points in order to level up.");
+	
+	PlayerData[playerid][pLevel]++;
+	PlayerData[playerid][pRespect] -= neededRespect;
+
+	SaveSQLInt(PlayerData[playerid][pSQLID], "players", "Level", PlayerData[playerid][pLevel]);
+	SaveSQLInt(PlayerData[playerid][pSQLID], "players", "Respect", PlayerData[playerid][pRespect]);
+
+	new string[128];
+	format(string, sizeof(string), "You have levelled up successfully. You are now level %d. (Respect points left: %d)", PlayerData[playerid][pLevel], PlayerData[playerid][pRespect]);
+	SendClientMessage(playerid, COLOR_WHITE, string);
+
+	return true;
+}
+
+// Stocks and other functions
 GetIP(playerid)
 {
 	new ip[20];

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Gép: 127.0.0.1
--- Létrehozás ideje: 2024. Jan 03. 22:11
+-- Létrehozás ideje: 2024. Jan 04. 00:09
 -- Kiszolgáló verziója: 10.4.28-MariaDB
 -- PHP verzió: 8.2.4
 
@@ -32,15 +32,18 @@ CREATE TABLE `players` (
   `Name` varchar(30) NOT NULL,
   `Password` varchar(255) NOT NULL,
   `RegIP` varchar(20) NOT NULL,
-  `AdminLevel` int(11) NOT NULL DEFAULT 0
+  `AdminLevel` int(11) NOT NULL DEFAULT 0,
+  `Money` int(11) NOT NULL DEFAULT 0,
+  `Level` int(11) NOT NULL DEFAULT 1,
+  `Respect` int(11) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- A tábla adatainak kiíratása `players`
 --
 
-INSERT INTO `players` (`id`, `Name`, `Password`, `RegIP`, `AdminLevel`) VALUES
-(1, 'testuser', '45c571a156ddcef41351a713bcddee5ba7e95460', '127.0.0.1', 0);
+INSERT INTO `players` (`id`, `Name`, `Password`, `RegIP`, `AdminLevel`, `Money`, `Level`, `Respect`) VALUES
+(1, 'testuser', '45c571a156ddcef41351a713bcddee5ba7e95460', '127.0.0.1', 0, 0, 0, 0);
 
 --
 -- Indexek a kiírt táblákhoz
