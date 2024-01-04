@@ -32,6 +32,7 @@ Includes & Plugins:
 #define COLOR_RED		0xFF000000
 #define COLOR_YELLOW	0xFFFF0000
 #define COLOR_EMOTE		0xEDA4FF00
+#define COLOR_SHOUT		0xD1692C00
 
 #define DIALOG_UNUSED		0
 #define DIALOG_REGISTER		1
@@ -248,7 +249,122 @@ Server:SendLocalMessage(playerid, color, msg[])
 	return true;
 }
 
+Server:SendLocalMessageEx(playerid, color, msg[], Float:distance)
+{
+	if(!LoggedIn[playerid]) return true;
+
+	new Float:x, Float:y, Float:z;
+	GetPlayerPos(playerid, x, y, z);
+	
+	foreach(Player, i) {
+		if(LoggedIn[i]) {
+			if(IsPlayerInRangeOfPoint(i, distance, x, y, z) && GetPlayerInterior(i) == GetPlayerInterior(playerid) && GetPlayerVirtualWorld(i) == GetPlayerVirtualWorld(playerid)) {
+				SendClientMessage(i, color, msg);
+			}
+		}
+	}
+
+	return true;
+}
+
+Server:GetDistanceBetweenPlayers(playerid, id, Float:distance)
+{
+	new bool:inRange = false;
+	
+	foreach(Player, i) {
+		if(LoggedIn[i] && GetPlayerInterior(i) == GetPlayerInterior(playerid) && GetPlayerVirtualWorld(i) == GetPlayerVirtualWorld(playerid)) {
+			new Float:x, Float:y, Float:z;
+			if(IsPlayerInRangeOfPoint(i, distance, x, y, z)) {
+				inRange = true;
+			}
+		}
+	}
+	
+	return inRange;
+}
+
 // General commands
+CMD:shout(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	if(isnull(params)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /s(shout) [shout message]");
+	
+	new string[128];
+	format(string, sizeof(string), "%s shouts: %s!", NameRP(playerid), params);
+	SendLocalMessageEx(playerid, COLOR_SHOUT, string, 20.0);
+
+	return true;
+}
+CMD:s(playerid, params[]) return cmd_shout(playerid, params);
+
+CMD:low(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	if(isnull(params)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /l(ow) [low message]");
+	
+	new string[128];
+	format(string, sizeof(string), "%s says (low): %s!", NameRP(playerid), params);
+	SendLocalMessageEx(playerid, COLOR_WHITE, string, 7.5);
+
+	return true;
+}
+CMD:l(playerid, params[]) return cmd_low(playerid, params);
+
+CMD:whisper(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	new id, msg[80];
+	
+	if(sscanf(params, "us[80]", id, msg)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /w(hisper) [player name or id] [whisper message]");
+	
+	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_WHITE, "That player isn't connected.");
+	if(!LoggedIn[id]) return SendClientMessage(playerid, COLOR_WHITE, "That player isn't logged in.");
+	
+	if(!GetDistanceBetweenPlayers(playerid, id, 3.5)) return SendClientMessage(playerid, COLOR_WHITE, "You must be close to the player to whisper to them.");
+	
+	new string[128];
+	format(string, sizeof(string), "[Whisper from %s] %s", NameRP(playerid), msg);
+	SendClientMessage(id, COLOR_YELLOW, string);
+	
+	format(string, sizeof(string), "[Whisper to %s] %s", NameRP(id), msg);
+	SendClientMessage(playerid, COLOR_YELLOW, string);
+	
+	format(string, sizeof(string), "* %s whispers something to %s...", NameRP(playerid), NameRP(id));
+	SendLocalMessage(playerid, COLOR_EMOTE, string);
+
+	return true;
+}
+CMD:w(playerid, params[]) return cmd_whisper(playerid, params);
+
+CMD:attempt(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	if(isnull(params)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /attempt [action message]");
+	
+	new string[128];
+	format(string, sizeof(string), "** %s attempts to %s and ", NameRP(playerid), params);
+	
+	new rand = random(50);
+	switch(rand) {
+		case 0 .. 25:
+		{
+			strins(string, "fails...", strlen(string));
+		}
+		default:
+		{
+			strins(string, "succeeds!", strlen(string));
+		}
+	}
+	
+	SendLocalMessage(playerid, COLOR_EMOTE, string);
+
+	return true;
+}
+
 CMD:b(playerid, params[])
 {
 	if(!LoggedIn[playerid]) return true;
