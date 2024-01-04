@@ -30,6 +30,8 @@ Includes & Plugins:
 
 #define COLOR_WHITE		0xFFFFFF00
 #define COLOR_RED		0xFF000000
+#define COLOR_YELLOW	0xFFFF0000
+#define COLOR_EMOTE		0xEDA4FF00
 
 #define DIALOG_UNUSED		0
 #define DIALOG_REGISTER		1
@@ -120,7 +122,7 @@ Server:DoesPlayerExist(playerid)
 
 Server:SQL_DoesPlayerExist(playerid)
 {
-	if (cache_num_rows(sqlConnection) != 0)
+	if(cache_num_rows(sqlConnection) != 0)
 	{
 		ShowLoginDialog(playerid, "");
 	}
@@ -228,6 +230,101 @@ Server:SaveSQLInt(sqlid, table[], row[], value)
 	return true;
 }
 
+Server:SendLocalMessage(playerid, color, msg[])
+{
+	if(!LoggedIn[playerid]) return true;
+
+	new Float:x, Float:y, Float:z;
+	GetPlayerPos(playerid, x, y, z);
+	
+	foreach(Player, i) {
+		if(LoggedIn[i]) {
+			if(IsPlayerInRangeOfPoint(i, 15.0, x, y, z) && GetPlayerInterior(i) == GetPlayerInterior(playerid) && GetPlayerVirtualWorld(i) == GetPlayerVirtualWorld(playerid)) {
+				SendClientMessage(i, color, msg);
+			}
+		}
+	}
+
+	return true;
+}
+
+// General commands
+CMD:b(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	if(isnull(params)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /b [Local OOC chat message]");
+	
+	new string[128];
+	format(string, sizeof(string), "(( [OOC - Local] %s says: %s ))", NameRP(playerid), params);
+	
+	SendLocalMessage(playerid, COLOR_YELLOW, string);
+	
+	return true;
+}
+
+CMD:pm(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	new id, msg[80];
+	if(sscanf(params, "us[80]", id, msg)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /pm [playerid or name] [message]");
+	
+	if(playerid == id) return SendClientMessage(playerid, COLOR_WHITE, "You can't send yourself a PM.");
+	if(!IsPlayerConnected(playerid)) return SendClientMessage(playerid, COLOR_WHITE, "That player isn't connected.");
+	if(!LoggedIn[id]) return SendClientMessage(playerid, COLOR_WHITE, "That player isn't logged in.");
+	
+	new string[128];
+	format(string, sizeof(string), "(( [Private message from %s (%d)] %s ))", NameRP(playerid), playerid, msg);
+	SendClientMessage(id, COLOR_YELLOW, string);
+	
+	format(string, sizeof(string), "(( [Private message to %s (%d)] %s ))", NameRP(id), id, msg);
+	SendClientMessage(playerid, COLOR_YELLOW, string);
+	
+	return true;
+}
+
+CMD:me(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	if(isnull(params)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /me [Action message]");
+
+	new string[128];
+	format(string, sizeof(string), "* %s %s", NameRP(playerid), params);
+	SendLocalMessage(playerid, COLOR_EMOTE, string);
+
+	return true;
+}
+
+CMD:do(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	if(isnull(params)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /do [Action message]");
+
+	new string[128];
+	format(string, sizeof(string), "* %s (( %s ))", params, NameRP(playerid));
+	SendLocalMessage(playerid, COLOR_EMOTE, string);
+
+	return true;
+}
+
+CMD:ame(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	if(isnull(params)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /me [Annotated action message]");
+
+	SetPlayerChatBubble(playerid, params, COLOR_EMOTE, 15.0, 10000);
+	
+	new string[128];
+	format(string, sizeof(string), "* Annotated message: %s (( %s ))", params, NameRP(playerid));
+	SendLocalMessage(playerid, COLOR_EMOTE, string);
+
+	return true;
+}
+
 // Account commands
 CMD:buylevel(playerid, params[])
 {
@@ -268,9 +365,23 @@ GetName(playerid)
 	return name;
 }
 
-stock strmatch(const string1[], const string2[])
+NameRP(playerid)
 {
-	if ((strcmp(string1, string2, true, strlen(string2)) == 0) && (strlen(string2) == strlen(string1))) return true;
+	new name[MAX_PLAYER_NAME];
+	GetPlayerName(playerid, name, sizeof(name));
+	
+	for(new i = 0; i < strlen(name); i++) {
+		if(name[i] == '_') {
+			name[i] = ' ';
+		}
+	}
+
+	return true;
+}
+
+strmatch(const string1[], const string2[])
+{
+	if((strcmp(string1, string2, true, strlen(string2)) == 0) && (strlen(string2) == strlen(string1))) return true;
 	
 	return false;
 }
