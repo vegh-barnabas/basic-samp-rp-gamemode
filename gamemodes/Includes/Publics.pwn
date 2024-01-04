@@ -18,6 +18,17 @@ Server:SQL_DoesPlayerExist(playerid)
 		ShowRegisterDialog(playerid, "");
 	}
 	
+	TogglePlayerSpectating(playerid, true);
+	
+	return true;
+}
+
+Server:TIMER_SetCameraPos(playerid)
+{
+	SetPlayerPos(playerid, -109.4670, 1133.6563, 70.2519);
+	SetPlayerCameraLookAt(playerid, -206.8355, 1120.8429, 14.7422);
+	SetPlayerCameraPos(playerid, -206.8355, 1120.8429, 14.7422);
+	
 	return true;
 }
 
@@ -53,13 +64,15 @@ Server:SQL_OnAccountRegister(playerid)
 	
 	DefaultPlayerValues(playerid);
 	
+	PlayerData[playerid][pSQLID] = cache_insert_id();
+	
 	return true;
 }
 
 Server:SQL_OnAccountLogin(playerid)
 {
 	if(cache_num_rows() == 0) {
-		ShowLoginDialog(playerid, "Incorrect password.");
+		return ShowLoginDialog(playerid, "Incorrect password.");
 	}
 	
 	SendClientMessage(playerid, COLOR_WHITE, "You have successfully logged into the server.");
@@ -72,28 +85,37 @@ Server:SQL_OnAccountLogin(playerid)
 
 Server:LoadPlayerData(playerid)
 {
-	new query[128];
+	new query[256];
 	mysql_format(sqlConnection, query, sizeof(query), "SELECT * FROM players WHERE id = %i LIMIT 1", PlayerData[playerid][pSQLID]);
-	mysql_pquery(sqlConnection, query, "SQL_OnLoadAccount", "i");
+	mysql_pquery(sqlConnection, query, "SQL_OnLoadAccount", "i", playerid);
 }
 
 Server:SQL_OnLoadAccount(playerid)
 {
+	LoggedIn[playerid] = true;
+
 	PlayerData[playerid][pAdminLevel] = cache_get_field_content_int(0, "AdminLevel", sqlConnection);
 	PlayerData[playerid][pMoney] = cache_get_field_content_int(0, "Money", sqlConnection);
 	PlayerData[playerid][pLevel] = cache_get_field_content_int(0, "Level", sqlConnection);
 	PlayerData[playerid][pRespect] = cache_get_field_content_int(0, "Respect", sqlConnection);
+	
+	PlayerData[playerid][pLastPos][0] = cache_get_field_content_float(0, "LastX", sqlConnection);
+	PlayerData[playerid][pLastPos][1] = cache_get_field_content_float(0, "LastY", sqlConnection);
+	PlayerData[playerid][pLastPos][2] = cache_get_field_content_float(0, "LastZ", sqlConnection);
+	PlayerData[playerid][pLastPos][3] = cache_get_field_content_float(0, "LastRot", sqlConnection);
+	
+	PlayerData[playerid][pLastInt] = cache_get_field_content_int(0, "Interior", sqlConnection);
+	PlayerData[playerid][pLastWorld] = cache_get_field_content_int(0, "VW", sqlConnection);
 	
 	SetPlayerScore(playerid, PlayerData[playerid][pLevel]);
 	
 	ResetPlayerMoney(playerid);
 	GivePlayerMoney(playerid, PlayerData[playerid][pMoney]);
 	
-	
-	new string[128];
-	format(string, sizeof(string), "SQLID: %d | Admin: %d", PlayerData[playerid][pSQLID], PlayerData[playerid][pAdminLevel]);
-	SendClientMessage(playerid, COLOR_WHITE, string);
+	TogglePlayerSpectating(playerid, false);
 
+	SetPlayerSpawn(playerid);
+	
 	return true;
 }
 
@@ -167,4 +189,56 @@ Server:GetDistanceBetweenPlayers(playerid, id, Float:distance)
 	}
 	
 	return inRange;
+}
+
+Server:SetPlayerSpawn(playerid)
+{
+	SetSpawnInfo(playerid, 0, DEFAULT_SKIN, PlayerData[playerid][pLastPos][0], PlayerData[playerid][pLastPos][1], PlayerData[playerid][pLastPos][2], PlayerData[playerid][pLastPos][3], 0, 0, 0, 0, 0, 0);
+	SpawnPlayer(playerid);
+	
+	SetPlayerVirtualWorld(playerid, PlayerData[playerid][pLastWorld]);
+	SetPlayerInterior(playerid, PlayerData[playerid][pLastInt]);
+
+	return true;
+}
+
+Server:SavePlayerPosition(playerid, bool:save)
+{
+	GetPlayerPos(playerid, PlayerData[playerid][pLastPos][0], PlayerData[playerid][pLastPos][1], PlayerData[playerid][pLastPos][2]);
+	GetPlayerFacingAngle(playerid, PlayerData[playerid][pLastPos][3]);
+
+	PlayerData[playerid][pLastInt] = GetPlayerInterior(playerid);
+	PlayerData[playerid][pLastWorld] = GetPlayerVirtualWorld(playerid);
+	
+	if(save) {
+		new query[128];
+		mysql_format(sqlConnection, query, sizeof(query), "UPDATE players SET LastX = %f, LastY = %f, LastZ = %f, LastRot = %f, Interior = %i, VW = %i WHERE id = %i LIMIT 1", PlayerData[playerid][pLastPos][0], PlayerData[playerid][pLastPos][1], PlayerData[playerid][pLastPos][2], PlayerData[playerid][pLastPos][3], PlayerData[playerid][pLastInt], PlayerData[playerid][pLastWorld], PlayerData[playerid][pSQLID]);
+		mysql_pquery(sqlConnection, query);
+	}
+
+	return true;
+}
+
+Server:TIMER_OneSecondTimer()
+{
+	if(lastSaveTime < 5) {
+		foreach(Player, i) {
+			if(LoggedIn[i]) {
+				SavePlayerPosition(i, false);
+			}
+		}
+	}
+	else {
+		foreach(Player, i) {
+			if(LoggedIn[i]) {
+				SavePlayerPosition(i, true);
+			}
+		}
+		
+		lastSaveTime = 0;
+	}
+
+	lastSaveTime++;
+
+	return true;
 }

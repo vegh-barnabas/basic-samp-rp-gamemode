@@ -38,15 +38,21 @@ main(){}
 
 public OnGameModeInit()
 {
+	SetGameModeText("Basic Roleplay "VERSION_TEXT"");
+
 	mysql_log(LOG_ERROR | LOG_WARNING, LOG_TYPE_HTML);
 	
 	sqlConnection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_DATABASE, MYSQL_PASSWORD);
+	
+	OneSecondTimer = SetTimer("TIMER_OneSecondTimer", 1000, true);
 
 	return true;
 }
 
 public OnGameModeExit()
 {
+	KillTimer(OneSecondTimer);
+
 	mysql_close(sqlConnection);
 
 	return false;
@@ -56,6 +62,15 @@ public OnPlayerConnect(playerid)
 {
 	DefaultPlayerValues(playerid);
 	DoesPlayerExist(playerid);
+	
+	SetTimerEx("TIMER_SetCameraPos", 1000, false, "i", playerid);
+	
+	return true;
+}
+
+public OnPlayerDisconnect(playerid, reason)
+{
+	DefaultPlayerValues(playerid);
 	
 	return true;
 }
@@ -82,11 +97,10 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 		{
 			if(!response) return Kick(playerid);
 			
-			new query[128];
+			new query[256];
 			mysql_format(sqlConnection, query, sizeof(query), "SELECT id FROM players WHERE Name = '%e' AND Password = sha1('%e') LIMIT 1", GetName(playerid), inputtext);
 			mysql_pquery(sqlConnection, query, "SQL_OnAccountLogin", "i", playerid);
 		}
-	
 	}
 
 	return false;

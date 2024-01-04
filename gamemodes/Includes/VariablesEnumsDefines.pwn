@@ -15,17 +15,25 @@
 #define DIALOG_REGISTER		1
 #define	DIALOG_LOGIN		2
 
+#define VERSION_TEXT	"1.0"
+
+#define DEFAULT_SKIN	60
+
 enum PLAYER_DATA
 {
 	pSQLID,
 	pAdminLevel,
 	pMoney,
 	pLevel,
-	pRespect
+	pRespect,
+	Float:pLastPos[5],
+	pLastInt,
+	pLastWorld
 }
 
 // Global variables
 new sqlConnection;
+new OneSecondTimer, lastSaveTime = 0;
 
 // Player variables
 new bool:LoggedIn[MAX_PLAYERS], PlayerData[MAX_PLAYERS][PLAYER_DATA];
