@@ -154,3 +154,22 @@ CMD:ame(playerid, params[])
 
 	return true;
 }
+
+CMD:injuries(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	new id;
+	
+	if(sscanf(params, "u", id)) return SendClientMessage(playerid, COLOR_WHITE, "Usage: /injuries [player id or name]");
+
+	if(!IsPlayerConnected(id)) return SendClientMessage(playerid, COLOR_WHITE, "That player isn't connected.");
+	if(!LoggedIn[id]) return SendClientMessage(playerid, COLOR_WHITE, "That player isn't logged in.");
+	
+	// this doesnt work for some reason
+	// if(!GetDistanceBetweenPlayers(playerid, id, 5.0)) return SendClientMessage(playerid, COLOR_WHITE, "You must be close to the player.");
+	
+	DisplayDamageData(id, playerid);
+	
+	return true;
+}

@@ -25,8 +25,9 @@ Includes & Plugins:
 #include "../gamemodes/Includes/OtherFunctions.pwn"
 #include "../gamemodes/Includes/Publics.pwn"
 
-#include "../gamemodes/Includes/Commands/General.pwn"
-#include "../gamemodes/Includes/Commands/Account.pwn"
+#include "../gamemodes/Includes/General_Commands.pwn"
+#include "../gamemodes/Includes/Account_Commands.pwn"
+#include "../gamemodes/Includes/Test_Commands.pwn"
 
 #include "../gamemodes/Includes/Houses.pwn"
 #include "../gamemodes/Includes/Businesses.pwn"
@@ -75,6 +76,13 @@ public OnPlayerDisconnect(playerid, reason)
 	return true;
 }
 
+public OnPlayerSpawn(playerid)
+{
+	ResetDamageData(playerid);
+
+	return true;
+}
+
 public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 {
 	switch(dialogid)
@@ -89,7 +97,7 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 				return true;
 			}
 			
-			new query[128];
+			new query[256];
 			mysql_format(sqlConnection, query, sizeof(query), "INSERT INTO players (Name, Password, RegIP) VALUES('%e', sha1('%e'), '%e')", GetName(playerid), inputtext, GetIP(playerid));
 			mysql_pquery(sqlConnection, query, "SQL_OnAccountRegister", "i", playerid);
 		}
@@ -104,4 +112,13 @@ public OnDialogResponse(playerid, dialogid, response, listitem, inputtext[])
 	}
 
 	return false;
+}
+
+public OnPlayerTakeDamage(playerid, issuerid, Float:amount, weaponid, bodypart)
+{
+	if(issuerid != INVALID_PLAYER_ID) {
+		SaveDamageData(playerid, weaponid, bodypart, amount);
+	}
+
+	return true;
 }

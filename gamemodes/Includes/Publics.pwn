@@ -85,7 +85,7 @@ Server:SQL_OnAccountLogin(playerid)
 
 Server:LoadPlayerData(playerid)
 {
-	new query[256];
+	new query[128];
 	mysql_format(sqlConnection, query, sizeof(query), "SELECT * FROM players WHERE id = %i LIMIT 1", PlayerData[playerid][pSQLID]);
 	mysql_pquery(sqlConnection, query, "SQL_OnLoadAccount", "i", playerid);
 }
@@ -126,6 +126,8 @@ Server:DefaultPlayerValues(playerid)
 	PlayerData[playerid][pMoney] = 0;
 	PlayerData[playerid][pLevel] = 1;
 	PlayerData[playerid][pRespect] = 0;
+	
+	ResetDamageData(playerid);
 	
 	return true;
 }
@@ -211,7 +213,7 @@ Server:SavePlayerPosition(playerid, bool:save)
 	PlayerData[playerid][pLastWorld] = GetPlayerVirtualWorld(playerid);
 	
 	if(save) {
-		new query[128];
+		new query[512];
 		mysql_format(sqlConnection, query, sizeof(query), "UPDATE players SET LastX = %f, LastY = %f, LastZ = %f, LastRot = %f, Interior = %i, VW = %i WHERE id = %i LIMIT 1", PlayerData[playerid][pLastPos][0], PlayerData[playerid][pLastPos][1], PlayerData[playerid][pLastPos][2], PlayerData[playerid][pLastPos][3], PlayerData[playerid][pLastInt], PlayerData[playerid][pLastWorld], PlayerData[playerid][pSQLID]);
 		mysql_pquery(sqlConnection, query);
 	}
@@ -239,6 +241,59 @@ Server:TIMER_OneSecondTimer()
 	}
 
 	lastSaveTime++;
+
+	return true;
+}
+
+Server:ResetDamageData(playerid)
+{
+	for(new i = 0; i < MAX_DAMAGES; i++) {
+		if(DamageData[i][DamagePlayerID] == playerid) {
+			DamageData[i][DamagePlayerID] = INVALID_PLAYER_ID;
+			DamageData[i][DamageWeapon] = INVALID_WEAPON_ID;
+			DamageData[i][DamageAmount] = 0.0;
+			DamageData[i][DamageBodyPart] = 0;
+		}
+	}
+	
+	return true;
+}
+
+Server:SaveDamageData(playerid, weaponid, bodypart, Float:amount)
+{
+	totalDamages++;
+	
+	DamageData[totalDamages][DamagePlayerID] = playerid;
+	DamageData[totalDamages][DamageWeapon] = weaponid;
+	DamageData[totalDamages][DamageAmount] = amount;
+	DamageData[totalDamages][DamageBodyPart] = bodypart;
+
+	return true;
+}
+
+Server:DisplayDamageData(playerid, forPlayerid)
+{
+	new count = 0;
+	
+	for(new i = 0; i < MAX_DAMAGES; i++) {
+		if(DamageData[i][DamagePlayerID] == playerid) {
+		count++;
+		}
+	}
+	
+	if(!count) return SendClientMessage(forPlayerid, COLOR_WHITE, "This player hasn't been injured.");
+	
+	new longStr[512] = EOS, weaponName[25] = EOS;
+	
+	for(new i = 0; i < MAX_DAMAGES; i++) {
+		if(DamageData[i][DamagePlayerID] == playerid) {
+			GetWeaponName(DamageData[i][DamageWeapon], weaponName, sizeof(weaponName));
+		
+			format(longStr, sizeof(longStr), "%s{FFFFFF}(%s - %s) %s\n", longStr, GetDamageType(DamageData[i][DamageWeapon]), GetBoneDamaged(DamageData[i][DamageBodyPart]), weaponName);
+		}
+	}
+	
+	ShowPlayerDialog(playerid, DIALOG_UNUSED, DIALOG_STYLE_LIST, "{FF0000}Damage Information", longStr, "Ok", "");
 
 	return true;
 }

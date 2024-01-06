@@ -17,7 +17,18 @@
 
 #define VERSION_TEXT	"1.0"
 
-#define DEFAULT_SKIN	60
+#define DEFAULT_SKIN		60
+#define INVALID_WEAPON_ID	-1
+
+#define MAX_DAMAGES	(MAX_PLAYERS * 10)
+
+#define BODY_PART_CHEST		3
+#define BODY_PART_TORSO		4
+#define BODY_PART_LEFT_ARM	5
+#define BODY_PART_RIGHT_ARM	6
+#define BODY_PART_LEFT_LEG	7
+#define BODY_PART_RIGHT_LEG	8
+#define BODY_PART_HEAD		9
 
 enum PLAYER_DATA
 {
@@ -31,9 +42,17 @@ enum PLAYER_DATA
 	pLastWorld
 }
 
+enum DAMAGE_DATA
+{
+	DamagePlayerID,
+	DamageWeapon,
+	Float:DamageAmount,
+	DamageBodyPart
+}
+
 // Global variables
 new sqlConnection;
 new OneSecondTimer, lastSaveTime = 0;
 
 // Player variables
-new bool:LoggedIn[MAX_PLAYERS], PlayerData[MAX_PLAYERS][PLAYER_DATA];
+new bool:LoggedIn[MAX_PLAYERS], PlayerData[MAX_PLAYERS][PLAYER_DATA], DamageData[MAX_DAMAGES][DAMAGE_DATA], totalDamages = 0;
