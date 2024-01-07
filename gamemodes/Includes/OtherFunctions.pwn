@@ -68,3 +68,34 @@ GetBoneDamaged(bodypart)
 
 	return bodypartR;
 }
+
+ReturnAdminRank(rankid)
+{
+	new string[20] = EOS;
+
+	switch(rankid) {
+		case 1: string = "Trial Moderator";
+		case 2: string = "Moderator";
+		case 3: string = "Admin";
+		case 4: string = "Lead Admin";
+		case 5: string = "Owner";
+		default: string = "None";
+	}
+
+	return string;
+}
+
+GetNearestHouseID(playerid, Float:range = 5.0)
+{
+	new id = -1;
+	
+	for(new i = 0; i < MAX_HOUSES && id == -1; i++) {
+		if(HouseData[i][HouseID] != 0) {
+			if(IsPlayerInRangeOfPoint(playerid, range, HouseData[i][HouseExterior][0], HouseData[i][HouseExterior][1], HouseData[i][HouseExterior][2])) {
+				id = i;
+			}
+		}
+	}
+
+	return id;
+}

@@ -20,15 +20,16 @@
 #define DEFAULT_SKIN		60
 #define INVALID_WEAPON_ID	-1
 
-#define MAX_DAMAGES	(MAX_PLAYERS * 10)
+#define MAX_DAMAGES		(MAX_PLAYERS * 10)
+#define MAX_HOUSES		50
 
-#define BODY_PART_CHEST		3
-#define BODY_PART_TORSO		4
-#define BODY_PART_LEFT_ARM	5
-#define BODY_PART_RIGHT_ARM	6
-#define BODY_PART_LEFT_LEG	7
-#define BODY_PART_RIGHT_LEG	8
-#define BODY_PART_HEAD		9
+#define BODY_PART_CHEST			3
+#define BODY_PART_TORSO			4
+#define BODY_PART_LEFT_ARM		5
+#define BODY_PART_RIGHT_ARM		6
+#define BODY_PART_LEFT_LEG		7
+#define BODY_PART_RIGHT_LEG		8
+#define BODY_PART_HEAD			9
 
 enum PLAYER_DATA
 {
@@ -50,9 +51,26 @@ enum DAMAGE_DATA
 	DamageBodyPart
 }
 
+enum HOUSE_DATA
+{
+	HouseID,
+	HouseOwnerSQL,
+	HouseName[40],
+	Float:HouseExterior[4],
+	Float:HouseInterior[4],
+	HouseInteriorID,
+	HousePrice,
+	HouseLocked,
+	HousePickup,
+	Text3D:HouseLabel
+}
+
 // Global variables
 new sqlConnection;
 new OneSecondTimer, lastSaveTime = 0;
 
 // Player variables
 new bool:LoggedIn[MAX_PLAYERS], PlayerData[MAX_PLAYERS][PLAYER_DATA], DamageData[MAX_DAMAGES][DAMAGE_DATA], totalDamages = 0;
+
+// House variables
+new HouseData[MAX_HOUSES][HOUSE_DATA], totalHousesCreated = 0;

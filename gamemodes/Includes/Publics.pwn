@@ -121,6 +121,8 @@ Server:SQL_OnLoadAccount(playerid)
 
 Server:DefaultPlayerValues(playerid)
 {
+	LoggedIn[playerid] = false;
+
 	PlayerData[playerid][pSQLID] = 0;
 	PlayerData[playerid][pAdminLevel] = 0;
 	PlayerData[playerid][pMoney] = 0;
@@ -296,4 +298,29 @@ Server:DisplayDamageData(playerid, forPlayerid)
 	ShowPlayerDialog(playerid, DIALOG_UNUSED, DIALOG_STYLE_LIST, "{FF0000}Damage Information", longStr, "Ok", "");
 
 	return true;
+}
+
+Server:GiveCash(playerid, amount)
+{
+	PlayerData[playerid][pMoney] += amount;
+	
+	ResetPlayerMoney(playerid);
+	GivePlayerMoney(playerid, PlayerData[playerid][pMoney]);
+	
+	SaveSQLInt(PlayerData[playerid][pSQLID], "players", "Money", PlayerData[playerid][pMoney]);
+
+	return true;
+}
+
+Server:CountPlayerHouses(playerid)
+{
+	new count = 0;
+	
+	for(new i = 0; i < MAX_HOUSES; i++) {
+		if(HouseData[i][HouseID] != 0 && HouseData[i][HouseOwnerSQL] == PlayerData[playerid][pSQLID]) {
+			count++;
+		}
+	}
+
+	return count;
 }

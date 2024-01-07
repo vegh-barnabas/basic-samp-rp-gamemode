@@ -46,6 +46,8 @@ public OnGameModeInit()
 	sqlConnection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_DATABASE, MYSQL_PASSWORD);
 	
 	OneSecondTimer = SetTimer("TIMER_OneSecondTimer", 1000, true);
+	
+	LoadServerHouses();
 
 	return true;
 }

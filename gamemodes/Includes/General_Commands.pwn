@@ -173,3 +173,51 @@ CMD:injuries(playerid, params[])
 	
 	return true;
 }
+
+CMD:enter(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	if(IsPlayerInAnyVehicle(playerid)) return true;
+	
+	for(new i = 0; i < MAX_HOUSES; i++) {
+		if(HouseData[i][HouseID] != 0) {
+			if(IsPlayerInRangeOfPoint(playerid, 5.0, HouseData[i][HouseExterior][0], HouseData[i][HouseExterior][1], HouseData[i][HouseExterior][2])) {
+				if(HouseData[i][HouseLocked] == 0) {
+					SetPlayerPos(playerid, HouseData[i][HouseInterior][0], HouseData[i][HouseInterior][1], HouseData[i][HouseInterior][2]);
+					SetPlayerFacingAngle(playerid, HouseData[i][HouseInterior][3]);
+					
+					SetPlayerInterior(playerid, HouseData[i][HouseInteriorID]);
+					SetPlayerVirtualWorld(playerid, HouseData[i][HouseID]);
+				}
+				else return SendClientMessage(playerid, COLOR_WHITE, "The door is locked.");
+			}
+		}
+	}
+	
+	return true;
+}
+
+CMD:exit(playerid, params[])
+{
+	if(!LoggedIn[playerid]) return true;
+	
+	if(IsPlayerInAnyVehicle(playerid)) return true;
+	
+	for(new i = 0; i < MAX_HOUSES; i++) {
+		if(HouseData[i][HouseID] != 0 && GetPlayerVirtualWorld(playerid) == HouseData[i][HouseID]) {
+			if(IsPlayerInRangeOfPoint(playerid, 5.0, HouseData[i][HouseInterior][0], HouseData[i][HouseInterior][1], HouseData[i][HouseInterior][2])) {
+				if(HouseData[i][HouseLocked] == 0) {
+					SetPlayerPos(playerid, HouseData[i][HouseExterior][0], HouseData[i][HouseExterior][1], HouseData[i][HouseExterior][2]);
+					SetPlayerFacingAngle(playerid, HouseData[i][HouseExterior][3]);
+					
+					SetPlayerInterior(playerid, 0);
+					SetPlayerVirtualWorld(playerid, 0);
+				}
+				else return SendClientMessage(playerid, COLOR_WHITE, "The door is locked.");
+			}
+		}
+	}
+	
+	return true;
+}
