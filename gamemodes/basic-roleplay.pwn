@@ -10,7 +10,7 @@ Includes & Plugins:
 	
 	Test user:
 		name - testuser
-		password - testuser
+		password - alma
 */
 
 

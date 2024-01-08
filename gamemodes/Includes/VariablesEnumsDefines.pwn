@@ -20,8 +20,9 @@
 #define DEFAULT_SKIN		60
 #define INVALID_WEAPON_ID	-1
 
-#define MAX_DAMAGES		(MAX_PLAYERS * 10)
-#define MAX_HOUSES		50
+#define MAX_DAMAGES				(MAX_PLAYERS * 10)
+#define MAX_HOUSES				50
+#define MAX_OWNED_VEHICLES		3
 
 #define BODY_PART_CHEST			3
 #define BODY_PART_TORSO			4
@@ -65,6 +66,17 @@ enum HOUSE_DATA
 	Text3D:HouseLabel
 }
 
+enum OWNED_CAR_DATA
+{
+	OwnedCarID,
+	OwnedCarOwner,
+	OwnedCarLock,
+	OwnedCarModel,
+	OwnedCarColor[2],
+	Float:OwnedCarPos[4],
+	OwnedCarPlate[10]
+}
+
 // Global variables
 new sqlConnection;
 new OneSecondTimer, lastSaveTime = 0;
@@ -74,3 +86,6 @@ new bool:LoggedIn[MAX_PLAYERS], PlayerData[MAX_PLAYERS][PLAYER_DATA], DamageData
 
 // House variables
 new HouseData[MAX_HOUSES][HOUSE_DATA], totalHousesCreated = 0;
+
+// Car variables
+new OwnedCarData[MAX_VEHICLES][OWNED_CAR_DATA];

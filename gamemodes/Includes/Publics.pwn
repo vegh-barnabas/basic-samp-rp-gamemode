@@ -114,6 +114,8 @@ Server:SQL_OnLoadAccount(playerid)
 	
 	TogglePlayerSpectating(playerid, false);
 
+	LoadPlayerOwnedVehicles(playerid);
+	
 	SetPlayerSpawn(playerid);
 	
 	return true;
@@ -323,4 +325,13 @@ Server:CountPlayerHouses(playerid)
 	}
 
 	return count;
+}
+
+Server:ToggleVehicleLock(vehicleId, bool:lockstate)
+{
+	new engine, lights, alarm, doors, bonnet, boot, objective;
+	GetVehicleParamsEx(vehicleId, engine, lights, alarm, doors, bonnet, boot, objective);
+	SetVehicleParamsEx(vehicleId, engine, lights, alarm, lockstate, bonnet, boot, objective);
+
+	return true;
 }
