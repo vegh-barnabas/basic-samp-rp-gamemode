@@ -13,32 +13,37 @@ Server:SQL_LoadPlayerOwnedVehicles(playerid)
 	
 	new rows, fields, vehicleId = INVALID_VEHICLE_ID;
 	
-	cache_get_data(rows, fields, sqlConnection);
+	cache_get_row_count(rows);
+	cache_get_field_count(fields);
 	
 	for(new i = 0; i < rows && i < MAX_VEHICLES; i++) {
-		vehicleId = CreateVehicle(cache_get_field_content_int(i, "ModelID", sqlConnection),
-		cache_get_field_content_float(i, "PosX", sqlConnection),
-		cache_get_field_content_float(i, "PosY", sqlConnection),
-		cache_get_field_content_float(i, "PosZ", sqlConnection),
-		cache_get_field_content_float(i, "PosA", sqlConnection),
-		cache_get_field_content_int(i, "Color1", sqlConnection),
-		cache_get_field_content_int(i, "Color2", sqlConnection), -1, false);
+		new modelId, Float:posX, Float:posY, Float:posZ, Float:posA, color1, color2;
+		
+		cache_get_value_name_int(i, "ModelID", modelId);
+		cache_get_value_name_float(i, "PosX", posX);
+		cache_get_value_name_float(i, "PosY", posY);
+		cache_get_value_name_float(i, "PosZ", posZ);
+		cache_get_value_name_float(i, "PosA", posA);
+		cache_get_value_name_int(i, "Color1", color1);
+		cache_get_value_name_int(i, "Color2", color2);
+	
+		vehicleId = CreateVehicle(modelId, posX, posY, posZ, posA, color1, color2 -1, false);
 		
 		if(vehicleId != INVALID_VEHICLE_ID) {
-			OwnedCarData[vehicleId][OwnedCarID] = cache_get_field_content_int(i, "id", sqlConnection);
-			OwnedCarData[vehicleId][OwnedCarOwner] = cache_get_field_content_int(i, "OwnerID", sqlConnection);
-			OwnedCarData[vehicleId][OwnedCarLock] = cache_get_field_content_int(i, "LockState", sqlConnection);
-			OwnedCarData[vehicleId][OwnedCarModel] = cache_get_field_content_int(i, "ModelID", sqlConnection);
+			cache_get_value_name_int(i, "id", OwnedCarData[vehicleId][OwnedCarID]);
+			cache_get_value_name_int(i, "OwnerID", OwnedCarData[vehicleId][OwnedCarOwner]);
+			cache_get_value_name_int(i, "LockState", OwnedCarData[vehicleId][OwnedCarLock]);
+			OwnedCarData[vehicleId][OwnedCarModel] = modelId;
 			
-			OwnedCarData[vehicleId][OwnedCarColor][0] = cache_get_field_content_int(i, "Color1", sqlConnection);
-			OwnedCarData[vehicleId][OwnedCarColor][1] = cache_get_field_content_int(i, "Color2", sqlConnection);
+			OwnedCarData[vehicleId][OwnedCarColor][0] = color1;
+			OwnedCarData[vehicleId][OwnedCarColor][1] = color2;
 			
-			OwnedCarData[vehicleId][OwnedCarPos][0] = cache_get_field_content_float(i, "PosX", sqlConnection);
-			OwnedCarData[vehicleId][OwnedCarPos][1] = cache_get_field_content_float(i, "PosY", sqlConnection);
-			OwnedCarData[vehicleId][OwnedCarPos][2] = cache_get_field_content_float(i, "PosZ", sqlConnection);
-			OwnedCarData[vehicleId][OwnedCarPos][3] = cache_get_field_content_float(i, "PosA", sqlConnection);
+			OwnedCarData[vehicleId][OwnedCarPos][0] = posX;
+			OwnedCarData[vehicleId][OwnedCarPos][1] = posY;
+			OwnedCarData[vehicleId][OwnedCarPos][2] = posZ;
+			OwnedCarData[vehicleId][OwnedCarPos][3] = posA;
 			
-			cache_get_field_content(i, "Plate", OwnedCarData[vehicleId][OwnedCarPlate], sqlConnection, 10);
+			cache_get_value_name(i, "Plate", OwnedCarData[vehicleId][OwnedCarPlate]);
 			SetVehicleNumberPlate(vehicleId, OwnedCarData[vehicleId][OwnedCarPlate]);
 			
 			SetVehicleToRespawn(vehicleId);

@@ -1,4 +1,5 @@
 gamemodes/*.amx
-mysql_log.html
 pawno/settings.ini
 server_log.txt
+logs/errors.log
+logs/warnings.log

@@ -1,7 +1,7 @@
 /*
 Includes & Plugins:
 	IZCMD Hungarian Accents: https://github.com/vegh-barnabas/hungarian-accents-I-ZCMD
-	MySQL R39-6: https://github.com/pBlueG/SA-MP-MySQL
+	MySQL R41-4: https://github.com/pBlueG/SA-MP-MySQL
 	Streamer 2.9.0: https://github.com/samp-incognito/samp-streamer-plugin
 	foreach: https://github.com/karimcambridge/samp-foreach
 	sscanf 2.8.2: https://github.com/Y-Less/sscanf/releases/tag/v2.8.2
@@ -41,9 +41,9 @@ public OnGameModeInit()
 {
 	SetGameModeText("Basic Roleplay "VERSION_TEXT"");
 
-	mysql_log(LOG_ERROR | LOG_WARNING, LOG_TYPE_HTML);
+	mysql_log(ERROR | WARNING);
 	
-	sqlConnection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_DATABASE, MYSQL_PASSWORD);
+	sqlConnection = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE);
 	
 	OneSecondTimer = SetTimer("TIMER_OneSecondTimer", 1000, true);
 	

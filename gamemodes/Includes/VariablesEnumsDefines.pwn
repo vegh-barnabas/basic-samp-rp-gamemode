@@ -78,7 +78,7 @@ enum OWNED_CAR_DATA
 }
 
 // Global variables
-new sqlConnection;
+new MySQL:sqlConnection;
 new OneSecondTimer, lastSaveTime = 0;
 
 // Player variables

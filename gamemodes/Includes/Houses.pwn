@@ -8,28 +8,29 @@ Server:SQL_LoadServerHouses()
 	if(cache_num_rows() == 0) return print("No houses available to load from database!");
 
 	new rows, fields;
-	cache_get_data(rows, fields, sqlConnection);
+	cache_get_row_count(rows);
+	cache_get_field_count(fields);
 	
 	for(new i = 0; i < rows && i < MAX_HOUSES; i++) {
-		HouseData[i+1][HouseID] = cache_get_field_content_int(i, "id", sqlConnection);
-		HouseData[i+1][HouseOwnerSQL] = cache_get_field_content_int(i, "OwnerSQL", sqlConnection);
-		HouseData[i+1][HouseName] = cache_get_field_content_int(i, "id", sqlConnection);
+		cache_get_value_name_int(i, "id", HouseData[i+1][HouseID]);
+		cache_get_value_name_int(i, "OwnerSQL", HouseData[i+1][HouseOwnerSQL]);
+		cache_get_value_name_int(i, "id", HouseData[i+1][HouseName]);
 		
-		cache_get_field_content(i, "Name", HouseData[i+1][HouseName], sqlConnection, 40);
+		cache_get_value_name(i, "Name", HouseData[i+1][HouseName]);
 		
-		HouseData[i+1][HouseExterior][0] = cache_get_field_content_float(i, "ExtX", sqlConnection);
-		HouseData[i+1][HouseExterior][1] = cache_get_field_content_float(i, "ExtY", sqlConnection);
-		HouseData[i+1][HouseExterior][2] = cache_get_field_content_float(i, "ExtZ", sqlConnection);
-		HouseData[i+1][HouseExterior][3] = cache_get_field_content_float(i, "ExtA", sqlConnection);
+		cache_get_value_name_float(i, "ExtX", HouseData[i+1][HouseExterior][0]);
+		cache_get_value_name_float(i, "ExtY", HouseData[i+1][HouseExterior][1]);
+		cache_get_value_name_float(i, "ExtZ", HouseData[i+1][HouseExterior][2]);
+		cache_get_value_name_float(i, "ExtA", HouseData[i+1][HouseExterior][3]);
 		
-		HouseData[i+1][HouseInterior][0] = cache_get_field_content_int(i, "IntX", sqlConnection);
-		HouseData[i+1][HouseInterior][1] = cache_get_field_content_int(i, "IntY", sqlConnection);
-		HouseData[i+1][HouseInterior][2] = cache_get_field_content_int(i, "IntZ", sqlConnection);
-		HouseData[i+1][HouseInterior][3] = cache_get_field_content_int(i, "IntA", sqlConnection);
-		HouseData[i+1][HouseInteriorID] = cache_get_field_content_int(i, "IntID", sqlConnection);
+		cache_get_value_name_float(i, "IntX", HouseData[i+1][HouseInterior][0]);
+		cache_get_value_name_float(i, "IntY", HouseData[i+1][HouseInterior][1]);
+		cache_get_value_name_float(i, "IntZ", HouseData[i+1][HouseInterior][2]);
+		cache_get_value_name_float(i, "IntA", HouseData[i+1][HouseInterior][3]);
+		cache_get_value_name_int(i, "IntID", HouseData[i+1][HouseInteriorID]);
 		
-		HouseData[i+1][HousePrice] = cache_get_field_content_int(i, "Price", sqlConnection);
-		HouseData[i+1][HouseLocked] = cache_get_field_content_int(i, "Locked", sqlConnection);
+		cache_get_value_name_int(i, "Price", HouseData[i+1][HousePrice]);
+		cache_get_value_name_int(i, "Locked", HouseData[i+1][HouseLocked]);
 	
 		totalHousesCreated++;
 	}
