@@ -2,7 +2,7 @@
 Includes & Plugins:
 	IZCMD Hungarian Accents: https://github.com/vegh-barnabas/hungarian-accents-I-ZCMD
 	MySQL R41-4: https://github.com/pBlueG/SA-MP-MySQL
-	Streamer 2.9.0: https://github.com/samp-incognito/samp-streamer-plugin
+	Streamer 2.9.6: https://github.com/samp-incognito/samp-streamer-plugin
 	foreach: https://github.com/karimcambridge/samp-foreach
 	sscanf 2.8.2: https://github.com/Y-Less/sscanf/releases/tag/v2.8.2
 	
